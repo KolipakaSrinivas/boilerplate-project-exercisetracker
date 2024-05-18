@@ -109,27 +109,25 @@ app.get("/api/users/:_id/logs", async (req,res) =>{
       res.send("could not find")
     }
 
-    const dateObj = {};
+ let dateObj = {}
+  if (from) {
+    dateObj["$gte"] = new Date(from)
+  }
+  if (to){
+    dateObj["$lte"] = new Date(to)
+  }
+  let filter = {
+    user_id: id
+  }
+  if(from || to){
+    filter.date = dateObj;
+  }
 
-    if(from) {
-      dateObj["$gta"] = new Date(from)
-    }
-    if(to) {
-      dateObj["$lte"] = new Date(to)
-    }
-    const filter = {
-      user_id:id
-    }
-
-    if(from || to ) {
-      filter.date = dateObj
-    }
-
-    const exercise = await ExerciseModel.find(filter).limit(+limit ?? 500)
+    const exercises = await Exercise.find(filter).limit(+limit ?? 500)
     const log = exercise.map(e => ({
       description: e.description,
       duration: e.duration,
-      date: e.date,
+      date: e.date.toDateString()
     }))
 
 
